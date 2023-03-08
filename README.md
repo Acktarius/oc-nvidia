@@ -10,8 +10,11 @@ ideally place in the /opt folder
 
 `cd oc-nvidia`
 
+`sudo chmod 755 oc-nvidia.sh`
+
 
 oc-nvidia is a bash script which can be launch as a service to setup overclock pre mining operation.
+
 `sudo ./oc-nvidia.sh`
 
 the value will be defaulted to the one in the oc_start.txt file
