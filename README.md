@@ -2,6 +2,12 @@
 
 ## this script is delivered “as is” and I deny any and all liability for any damages arising out of using this script
 
+ideally place in the /opt folder
+`cd /opt'
+`git clone https://github.com/Acktarius/oc-nvidia.git`
+`cd oc-nvidia`
+
+
 oc-nvidia is a bash script which can be launch as a service to setup overclock pre mining operation.
 `sudo ./oc-nvidia.sh`
 
