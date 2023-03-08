@@ -3,8 +3,11 @@
 ## this script is delivered “as is” and I deny any and all liability for any damages arising out of using this script
 
 ideally place in the /opt folder
-`cd /opt'
+
+`cd /opt`
+
 `git clone https://github.com/Acktarius/oc-nvidia.git`
+
 `cd oc-nvidia`
 
 
