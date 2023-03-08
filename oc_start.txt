@@ -1,0 +1,4 @@
+pl = 100
+cclkoff = 80
+mclkoff = -500
+fspeed = 55
