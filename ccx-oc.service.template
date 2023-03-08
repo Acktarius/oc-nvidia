@@ -1,0 +1,15 @@
+[Unit]
+Description=OverClock
+After=Network-up.target
+
+[Service]
+Type=simple
+User=root
+Group=root
+WorkingDirectory=/opt/oc-nvidia/
+ExecStart=/opt/oc-nvidia/oc-nvidia.sh
+Restart=always
+RestartSec=30
+
+[Install]
+WantedBy=multi-user.target
