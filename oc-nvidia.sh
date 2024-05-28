@@ -10,6 +10,7 @@ kill -INT $$
 }
 #Nvidia gpu
 nbCard=$(nvidia-settings -q gpus | grep -c 'NVIDIA')
+echo "nombre de carte =  ${nbCard}"
 #fsv fan speed value ------------------------------------------Fan Speed
 declare -a fsv
 fsvs=$(cat oc_settings.txt | grep 'fsv')
@@ -38,7 +39,7 @@ declare -a cclkov
 cclkovs=$(cat oc_settings.txt | grep 'cclkov')
 cclkovss=${cclkovs##"cclkov:"}
 read -a cclkov <<< ${cclkovss//","/" "}
-echo "carte core clock offset ${#cclkov[@]}"
+echo "carte core clock offset ${#cclkov[@]} ${cclkov[@]} "
 coreClockOffset() {
 nvidia-settings -a [gpu:$1]/GpuPowerMizerMode=1
 nvidia-settings -c :0 -a [gpu:$1]/GPUGraphicsClockOffset[2]=$2
@@ -57,10 +58,12 @@ nvidia-smi -i $1 -pl $2
 }
 
 #Checks nb parameters
-if [[ ${#cclkov[@]} != $nbCard ]] || [[ ${#plv[@]} != $nbCard ]] || [[ ${#fsv[@]} != $nbCard ]]; then
-echo "numbers of parameters doesn't match card quantity"
-sleep 3
-trip
+if [[ ${#cclkov[@]} != $nbCard ]]; then
+echo "numbers of core offset parameters doesn't match card quantity"; sleep 3; trip
+elif  [[ ${#plv[@]} != $nbCard ]]; then
+echo  "numbers of power limit parameters differs from number of cards"; sleep 3; trip
+elif  [[ ${#fsv[@]} != $nbCard ]]; then
+echo  "numbers of power limit parameters differs from number of cards"; sleep 3; trip
 fi
 
 #Checks fans value
