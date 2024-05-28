@@ -10,16 +10,16 @@ kill -INT $$
 }
 #Nvidia gpu
 nbCard=$(nvidia-settings -q gpus | grep -c 'NVIDIA')
-#fsv fan speed value
+#fsv fan speed value ------------------------------------------Fan Speed
 declare -a fsv
 fsvs=$(cat oc_settings.txt | grep 'fsv')
-fsvss=${fsvs##"fsv,"}
+fsvss=${fsvs##"fsv:"}
 read -a fsv <<< ${fsvss//","/" "}
 
 
 fanSpeed() {
-nvidia-settings -a [fan:$1]/GPUTargetFanSpeed=$2
-
+nvidia-settings -a "[gpu:$1]/GPUFanControlState=1"\
+ -a [fan:$1]/GPUTargetFanSpeed=$2
 }
 
 #------------------------------------------------------------Core Clock
@@ -36,32 +36,34 @@ nvidia-settings -c :0 -a [gpu:$1]/GPUGraphicsClockOffset[2]=$2
 #------------------------------------------------------------Core Clock OffSet
 declare -a cclkov
 cclkovs=$(cat oc_settings.txt | grep 'cclkov')
-cclkovss=${cclkovs##"cclkov,"}
+cclkovss=${cclkovs##"cclkov:"}
 read -a cclkov <<< ${cclkovss//","/" "}
-echo "${#cclkov[@]}"
+echo "carte core clock offset ${#cclkov[@]}"
 coreClockOffset() {
-#nvidia-settings -a [gpu:$1]/GpuPowerMizerMode=1
-nvidia-settings -c :$1 -a [gpu:$1]/GPUGraphicsClockOffset[2]=$2
+nvidia-settings -a [gpu:$1]/GpuPowerMizerMode=1
+nvidia-settings -c :0 -a [gpu:$1]/GPUGraphicsClockOffset[2]=$2
 }
 
 
 #------------------------------------------------------------Power Limit
 declare -a plv
 plvs=$(cat oc_settings.txt | grep 'plv')
-plvss=${plvs##"plv,"}
+plvss=${plvs##"plv:"}
 read -a plv <<< ${plvss//","/" "}
 echo "${#plv[@]}"
 powerLimit() {
-nvidia-smi -i $1 -pl $2 > /dev/null
+nvidia-smi -i $1 -pl $2 
+#> /dev/null
 }
 
-#Checks fans value
-## nb parameters
-if [[ ${#fsv[@]} != $nbCard ]]; then
-echo "incorrect number of parameters"
+#Checks nb parameters
+if [[ ${#cclkov[@]} != $nbCard ]] || [[ ${#plv[@]} != $nbCard ]] || [[ ${#fsv[@]} != $nbCard ]]; then
+echo "numbers of parameters doesn't match card quantity"
 sleep 3
 trip
 fi
+
+#Checks fans value
 ## acceptable value
 for ((i = 0 ; i < ${#fsv[@]} ; i++)); do
     if [[ ${fsv[$i]} -lt 41 ]]; then
@@ -76,14 +78,7 @@ for ((i = 0 ; i < ${#fsv[@]} ; i++)); do
   	trip
   fi
 done
-#Check core offset value
-#Checks fans value
-## nb parameters
-if [[ ${#cclkov[@]} != $nbCard ]]; then
-echo "incorrect number of parameters for core clock offset"
-sleep 3
-trip
-fi
+##Check core offset value
 
 
 
@@ -93,8 +88,8 @@ fi
 #fanSpeed $i ${fsv[$i]}
 #done
 ##Coreclock offset
-
+coreClockOffset 0 100
 ##PowerLimit
-for ((i = 0 ; i < ${#plv[@]} ; i++)); do
-powerLimit $i ${plv[$i]}
-done
+#for ((i = 0 ; i < ${#plv[@]} ; i++)); do
+#powerLimit $i ${plv[$i]}
+#done
