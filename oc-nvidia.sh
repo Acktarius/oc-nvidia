@@ -1,60 +1,100 @@
 #!/bin/bash
+# overclock nvidia for Ubuntu users
+# this file is subject to Licence
+# Copyright (c) 2024, Acktarius
 
-ocfor="(Overclock for "
-ocfor+=$(nvidia-settings -c :0 -q gpus | grep 'NVIDIA' | cut -d " " -f 8,9,10)
-echo "${ocfor}"
+#declaration variables and functions
+#trip
+trip() {
+kill -INT $$
+}
+#Nvidia gpu
+nbCard=$(nvidia-settings -q gpus | grep -c 'NVIDIA')
+#fsv fan speed value
+declare -a fsv
+fsvs=$(cat oc_settings.txt | grep 'fsv')
+fsvss=${fsvs##"fsv,"}
+read -a fsv <<< ${fsvss//","/" "}
 
-for n in 1 3 5 7; do
-v=$(( $n+1 ))
-if [ "${!n}" == "pl" ]; then
-pl=${!v}
-else
-	if [ "${!n}" == "cc" ]; then
-	cclkoff=${!v}
-	else
-		if [ "${!n}" == "mc" ]; then
-		mclkoff=${!v}		
-		else
-			if [ "${!n}" == "fs" ]; then
-			fspeed=${!v}
-			fi	
-		fi
-	fi
+
+fanSpeed() {
+nvidia-settings -a [fan:$1]/GPUTargetFanSpeed=$2
+
+}
+
+#------------------------------------------------------------Core Clock
+: '
+declare -a cclkv
+cclkvs$(cat oc_settings.txt | grep 'cclkv')
+cclkvss=${cclkvs##"cclkv,"}
+read -a cclkv <<< ${cclkvss//","/" "}
+
+coreClock() {
+nvidia-settings -c :0 -a [gpu:$1]/GPUGraphicsClockOffset[2]=$2
+}
+'
+#------------------------------------------------------------Core Clock OffSet
+declare -a cclkov
+cclkovs=$(cat oc_settings.txt | grep 'cclkov')
+cclkovss=${cclkovs##"cclkov,"}
+read -a cclkov <<< ${cclkovss//","/" "}
+echo "${#cclkov[@]}"
+coreClockOffset() {
+#nvidia-settings -a [gpu:$1]/GpuPowerMizerMode=1
+nvidia-settings -c :$1 -a [gpu:$1]/GPUGraphicsClockOffset[2]=$2
+}
+
+
+#------------------------------------------------------------Power Limit
+declare -a plv
+plvs=$(cat oc_settings.txt | grep 'plv')
+plvss=${plvs##"plv,"}
+read -a plv <<< ${plvss//","/" "}
+echo "${#plv[@]}"
+powerLimit() {
+nvidia-smi -i $1 -pl $2 > /dev/null
+}
+
+#Checks fans value
+## nb parameters
+if [[ ${#fsv[@]} != $nbCard ]]; then
+echo "incorrect number of parameters"
+sleep 3
+trip
 fi
+## acceptable value
+for ((i = 0 ; i < ${#fsv[@]} ; i++)); do
+    if [[ ${fsv[$i]} -lt 41 ]]; then
+  	echo "fan spped value incorrect, less than 41"
+  	sleep 3
+  	break
+  	trip
+  elif [[ ${fsv[$i]} -gt 100 ]]; then
+  	echo "fan speed value incorrect, more than 100"
+  	sleep 3
+  	break
+  	trip
+  fi
 done
-
-#read -p "Enter power limit : " pl
-if [ ! $pl > 0 ]; then
-pl=$(cat oc_start.txt | grep 'pl' | cut -d " " -f 3)
+#Check core offset value
+#Checks fans value
+## nb parameters
+if [[ ${#cclkov[@]} != $nbCard ]]; then
+echo "incorrect number of parameters for core clock offset"
+sleep 3
+trip
 fi
-nvidia-smi -i 0 -pl $pl
 
 
-#read -p "gpu core clock offset : " cclkoff
-if [ ! $cclkoff > 0 ]; then
-cclkoff=$(cat oc_start.txt | grep 'cclkoff' | cut -d " " -f 3)
-fi
-textcc='[gpu:0]/GPUGraphicsClockOffset[2]='
-textcc+=$cclkoff
-nvidia-settings -c :0 -a $textcc
 
-#read -p "gpu memory clock offset : " mclkoff
-if [ ! $mclkoff > 0 ]; then
-mclkoff=$(cat oc_start.txt | grep 'mclkoff' | cut -d " " -f 3)
-fi
-textmc='[gpu:0]/GPUMemoryTransferRateOffset[2]='
-textmc+=$mclkoff
-nvidia-settings -c :0 -a $textmc
+#Main
+##Fan Speed
+#for ((i = 0 ; i < ${#fsv[@]} ; i++)); do
+#fanSpeed $i ${fsv[$i]}
+#done
+##Coreclock offset
 
-#read -p "Fan speed % " fspeed
-if [ ! $fspeed > 0 ]; then
-fspeed=$(cat oc_start.txt | grep 'fspeed' | cut -d " " -f 3)
-fi
-textf='[fan:0]/GPUTargetFanSpeed='
-textf+=$fspeed
-nvidia-settings -a $textf
-textf='[fan:1]/GPUTargetFanSpeed='
-textf+=$fspeed
-nvidia-settings -a $textf
-
-echo 'Done, happy hashing !'
+##PowerLimit
+for ((i = 0 ; i < ${#plv[@]} ; i++)); do
+powerLimit $i ${plv[$i]}
+done
