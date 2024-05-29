@@ -25,13 +25,16 @@ fansv+=("${fsv[$i]}")
 fansv+=("${fsv[$i]}")
 fi
 done
-echo ${fansv[@]}
 
 fanSpeedControl() {
+if [[ $2 != "-1" ]]; then 
 nvidia-settings -a [gpu:$1]/GPUFanControlState=1
+fi
 }
 fanSpeed() {
+if [[ $2 != "-1" ]]; then 
 nvidia-settings -a [fan:$1]/GPUTargetFanSpeed=$2
+fi
 }
 
 #------------------------------------------------------------Core Clock OffSet
@@ -42,7 +45,9 @@ read -a cclkov <<< ${cclkovss//","/" "}
 echo "carte core clock offset ${#cclkov[@]} ${cclkov[@]} "
 coreClockOffset() {
 #nvidia-settings -a [gpu:$1]/GpuPowerMizerMode=0
+if [[ $2 != "-1" ]]; then 
 nvidia-settings -a [gpu:$1]/GPUGraphicsClockOffsetAllPerformanceLevels=$2
+fi
 }
 
 #------------------------------------------------------------Mem Clock OffSet
@@ -52,7 +57,9 @@ mclkovss=${mclkovs##"mclkov:"}
 read -a mclkov <<< ${mclkovss//","/" "}
 echo "carte mem clock offset ${#mclkov[@]} ${mclkov[@]} "
 memClockOffset() {
+if [[ $2 != "-1" ]]; then 
 nvidia-settings -a [gpu:$1]/GPUMemoryTransferRateOffsetAllPerformanceLevels=$2
+fi
 }
 
 #------------------------------------------------------------Power Limit
@@ -62,8 +69,9 @@ plvss=${plvs##"plv:"}
 read -a plv <<< ${plvss//","/" "}
 echo "${#plv[@]}"
 powerLimit() {
-nvidia-smi -i $1 -pl $2 
-#> /dev/null
+if [[ $2 != "-1" ]]; then 
+nvidia-smi -i $1 -pl $2 > /dev/null
+fi
 }
 
 #Checks nb parameters
@@ -78,7 +86,8 @@ fi
 #Checks fans value
 ## acceptable value
 for ((i = 0 ; i < ${#fsv[@]} ; i++)); do
-    if [[ ${fsv[$i]} -lt 41 ]]; then
+if [[ ${fsv[$i]} != "-1" ]]; then
+ if [[ ${fsv[$i]} -lt 41 ]]; then
   	echo "fan spped value incorrect, less than 41"
   	sleep 3
   	break
@@ -89,6 +98,7 @@ for ((i = 0 ; i < ${#fsv[@]} ; i++)); do
   	break
   	trip
   fi
+fi
 done
 ##Check core offset value
 
@@ -97,7 +107,7 @@ done
 #Main
 ##Fan Speed Control
 for ((i = 0 ; i < ${#fsv[@]} ; i++)); do
-fanSpeedControl $i
+fanSpeedControl $i ${fsv[$i]}
 done
 
 ##Fan Speed
@@ -118,3 +128,5 @@ done
 for ((i = 0 ; i < ${#plv[@]} ; i++)); do
 powerLimit $i ${plv[$i]}
 done
+
+unset plv mclkov cclkov fansv fsv
