@@ -23,17 +23,6 @@ nvidia-settings -a "[gpu:$1]/GPUFanControlState=1"\
  -a [fan:$1]/GPUTargetFanSpeed=$2
 }
 
-#------------------------------------------------------------Core Clock
-: '
-declare -a cclkv
-cclkvs$(cat oc_settings.txt | grep 'cclkv')
-cclkvss=${cclkvs##"cclkv,"}
-read -a cclkv <<< ${cclkvss//","/" "}
-
-coreClock() {
-nvidia-settings -c :0 -a [gpu:$1]/GPUGraphicsClockOffset[2]=$2
-}
-'
 #------------------------------------------------------------Core Clock OffSet
 declare -a cclkov
 cclkovs=$(cat oc_settings.txt | grep 'cclkov')
@@ -41,10 +30,19 @@ cclkovss=${cclkovs##"cclkov:"}
 read -a cclkov <<< ${cclkovss//","/" "}
 echo "carte core clock offset ${#cclkov[@]} ${cclkov[@]} "
 coreClockOffset() {
-nvidia-settings -a [gpu:$1]/GpuPowerMizerMode=1
-nvidia-settings -c :0 -a [gpu:$1]/GPUGraphicsClockOffset[2]=$2
+#nvidia-settings -a [gpu:$1]/GpuPowerMizerMode=0
+nvidia-settings -a [gpu:$1]/GPUGraphicsClockOffsetAllPerformanceLevels=$2
 }
 
+#------------------------------------------------------------Mem Clock OffSet
+declare -a mclkov
+mclkovs=$(cat oc_settings.txt | grep 'mclkov')
+mclkovss=${mclkovs##"mclkov:"}
+read -a mclkov <<< ${mclkovss//","/" "}
+echo "carte mem clock offset ${#mclkov[@]} ${mclkov[@]} "
+memClockOffset() {
+nvidia-settings -a [gpu:$1]/GPUMemoryTransferRateOffsetAllPerformanceLevels=$2
+}
 
 #------------------------------------------------------------Power Limit
 declare -a plv
@@ -91,7 +89,15 @@ for ((i = 0 ; i < ${#fsv[@]} ; i++)); do
 fanSpeed $i ${fsv[$i]}
 done
 ##Coreclock offset
-#coreClockOffset 0 100
+for ((i = 0 ; i < ${#cclkov[@]} ; i++)); do
+coreClockOffset $i ${cclkov[$i]}
+done
+
+##Memclock offset
+for ((i = 0 ; i < ${#mclkov[@]} ; i++)); do
+memClockOffset $i ${mclkov[$i]}
+done
+
 ##PowerLimit
 for ((i = 0 ; i < ${#plv[@]} ; i++)); do
 powerLimit $i ${plv[$i]}
