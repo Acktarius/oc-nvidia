@@ -16,11 +16,22 @@ declare -a fsv
 fsvs=$(cat oc_settings.txt | grep 'fsv')
 fsvss=${fsvs##"fsv:"}
 read -a fsv <<< ${fsvss//","/" "}
+declare -a fansv
+for ((i = 0 ; i < ${#fsv[@]} ; i++)); do
+if [[ $(nvidia-settings -q fans --verbose 2> /dev/null | grep -c "gpu:${i}") == 1 ]]; then
+fansv+=("${fsv[$i]}")
+elif [[ $(nvidia-settings -q fans --verbose 2> /dev/null | grep -c "gpu:${i}") == 2 ]]; then
+fansv+=("${fsv[$i]}")
+fansv+=("${fsv[$i]}")
+fi
+done
+echo ${fansv[@]}
 
-
+fanSpeedControl() {
+nvidia-settings -a [gpu:$1]/GPUFanControlState=1
+}
 fanSpeed() {
-nvidia-settings -a "[gpu:$1]/GPUFanControlState=1"\
- -a [fan:$1]/GPUTargetFanSpeed=$2
+nvidia-settings -a [fan:$1]/GPUTargetFanSpeed=$2
 }
 
 #------------------------------------------------------------Core Clock OffSet
@@ -84,9 +95,14 @@ done
 
 
 #Main
-##Fan Speed
+##Fan Speed Control
 for ((i = 0 ; i < ${#fsv[@]} ; i++)); do
-fanSpeed $i ${fsv[$i]}
+fanSpeedControl $i
+done
+
+##Fan Speed
+for ((i = 0 ; i < ${#fansv[@]} ; i++)); do
+fanSpeed $i ${fansv[$i]}
 done
 ##Coreclock offset
 for ((i = 0 ; i < ${#cclkov[@]} ; i++)); do
