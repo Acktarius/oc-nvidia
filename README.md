@@ -11,6 +11,10 @@ meant to be use with NVIDIA 1660Super and 1660Ti
 `nvidia-smi`  
 *if successful*  
 `sudo apt install nvidia-settings`  
+  
+*in /usr/share/X11/xorg.conf.d/10-nvidia.conf* add :  
+`Option "Coolbits" "28"`  
+
 
 ## this script is delivered “as is” and I deny any and all liability for any damages arising out of using this script
 
@@ -34,9 +38,9 @@ or can be set using parameter :
 * power limit in W :  
 `plv`  
 * core clock offset :  
-**WIP**  
+  cclkov`    
 * memory clock offset :  
-**WIP**  
+`mclkov`  
 * fan speed for a two fan gpu in % :  
 `fsv`  
 
