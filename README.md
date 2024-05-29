@@ -33,8 +33,8 @@ oc-nvidia is a bash script which can be launch as a service to setup overclock p
 
 `sudo ./oc-nvidia.sh`
 
-the value will be picked from oc_settings.txt file
-or can be set using parameter : 
+the value will be picked from oc_settings.txt file  
+*a* ***-1*** *value will get ignored*   
 * power limit in W :  
 `plv`  
 * core clock offset :  
