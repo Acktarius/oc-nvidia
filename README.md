@@ -1,5 +1,17 @@
 # oc-nvidia
 
+---
+meant to be use with NVIDIA 1660Super and 1660Ti  
+---
+
+**seems to work well with driver 550**  
+`sudo apt install nvidia-driver-550-server nvidia-dkms-550-server`  
+`sudo reboot`  
+*check with*  
+`nvidia-smi`  
+*if successful*  
+`sudo apt install nvidia-settings`  
+
 ## this script is delivered “as is” and I deny any and all liability for any damages arising out of using this script
 
 ideally place in the /opt folder
@@ -17,17 +29,14 @@ oc-nvidia is a bash script which can be launch as a service to setup overclock p
 
 `sudo ./oc-nvidia.sh`
 
-the value will be defaulted to the one in the oc_start.txt file
+the value will be picked from oc_settings.txt file
 or can be set using parameter : 
-* power limit in W :
-`pl`
-* core clock offset :
-`cc`
-* memory clock offset :
-`mc`
-* fan speed for a two fan gpu in % :
-`fs`
-
-## Exemple
-`sudo ./oc-nvidia.sh fs 80 cc 100 mc -500 pl 100`
+* power limit in W :  
+`plv`  
+* core clock offset :  
+**WIP**  
+* memory clock offset :  
+**WIP**  
+* fan speed for a two fan gpu in % :  
+`fsv`  
 
