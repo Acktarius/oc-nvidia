@@ -87,12 +87,12 @@ done
 
 #Main
 ##Fan Speed
-#for ((i = 0 ; i < ${#fsv[@]} ; i++)); do
-#fanSpeed $i ${fsv[$i]}
-#done
+for ((i = 0 ; i < ${#fsv[@]} ; i++)); do
+fanSpeed $i ${fsv[$i]}
+done
 ##Coreclock offset
-coreClockOffset 0 100
+#coreClockOffset 0 100
 ##PowerLimit
-#for ((i = 0 ; i < ${#plv[@]} ; i++)); do
-#powerLimit $i ${plv[$i]}
-#done
+for ((i = 0 ; i < ${#plv[@]} ; i++)); do
+powerLimit $i ${plv[$i]}
+done
