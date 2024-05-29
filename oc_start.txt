@@ -1,3 +1,4 @@
+### OBSOLITE DO NOT USE , FOR REFERENCE ONLY FOR PREVIOUS VERSION ##
 pl = 100
 cclkoff = 80
 mclkoff = -500
