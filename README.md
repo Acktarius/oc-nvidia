@@ -18,6 +18,8 @@ meant to be use with NVIDIA 1660Super and 1660Ti
 
 ## this script is delivered “as is” and I deny any and all liability for any damages arising out of using this script
 
+## Install
+
 ideally place in the /opt folder
 
 `cd /opt`
@@ -28,17 +30,27 @@ ideally place in the /opt folder
 
 `sudo chmod 755 oc-nvidia.sh`
 
+## Run
 
-oc-nvidia is a bash script which can be launch as a service to setup overclock pre mining operation.
+oc-nvidia is a bash script to setup overclock pre mining operation.  
 
-`sudo ./oc-nvidia.sh`
+`sudo ./oc-nvidia.sh`  
 
-the value will be picked from oc_settings.txt file  
+you can call specific setting for a coin ie. :  
+
+`sudo ./oc-nvidia.sh CCX`  
+
+you can reset with :  
+`sudo ./oc-nvidia.sh reset`  
+
+the value will be picked from oc_settings.txt file
+*(oc_settings.txt files provided in this repo are for a 9 cards rig)*  
+
 *a* ***-1*** *value will get ignored*   
 * power limit in W :  
 `plv`  
 * core clock offset :  
-  cclkov`    
+  `cclkov`    
 * memory clock offset :  
 `mclkov`  
 * fan speed for a two fan gpu in % :  
