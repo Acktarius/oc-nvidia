@@ -4,16 +4,40 @@
 # Copyright (c) 2024, Acktarius
 
 #declaration variables and functions
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+echo $SCRIPT_DIR
 #trip
 trip() {
 kill -INT $$
 }
+#implement value of coin mention in argument
+if [[ -n $1 ]];then
+if [[ -f $SCRIPT_DIR/oc_settings_$1.txt ]]; then
+cat $SCRIPT_DIR/oc_settings_$1.txt > $SCRIPT_DIR/oc_settings.txt
+fi
+fi
 #Nvidia gpu
 nbCard=$(nvidia-settings -q gpus | grep -c 'NVIDIA')
 echo "nombre de carte =  ${nbCard}"
+#Reset function ------------------------------------------------Reset
+reset() {
+for ((j = 0 ; j < ${nbCard} ; j++)); do
+##fans
+nvidia-settings -a [gpu:$j]/GPUFanControlState=0
+##Core clock & mem offset
+nvidia-settings -a [gpu:$j]/GPUGraphicsClockOffsetAllPerformanceLevels=0
+nvidia-settings -a [gpu:$j]/GPUMemoryTransferRateOffsetAllPerformanceLevels=0
+##Power
+dPower=$(nvidia-smi -i $j -q | grep "Default Power Limit" | head -n 1 | cut -d ":" -f 2 | cut -d "." -f 1 | tr -d " "
+)
+if [[ $dPower =~ ^[0-9]+$ ]]; then
+nvidia-smi -i $j -pl $dPower
+fi
+done
+}
 #fsv fan speed value ------------------------------------------Fan Speed
 declare -a fsv
-fsvs=$(cat oc_settings.txt | grep 'fsv')
+fsvs=$(cat $SCRIPT_DIR/oc_settings.txt | grep 'fsv')
 fsvss=${fsvs##"fsv:"}
 read -a fsv <<< ${fsvss//","/" "}
 declare -a fansv
@@ -39,7 +63,7 @@ fi
 
 #------------------------------------------------------------Core Clock OffSet
 declare -a cclkov
-cclkovs=$(cat oc_settings.txt | grep 'cclkov')
+cclkovs=$(cat $SCRIPT_DIR/oc_settings.txt | grep 'cclkov')
 cclkovss=${cclkovs##"cclkov:"}
 read -a cclkov <<< ${cclkovss//","/" "}
 echo "carte core clock offset ${#cclkov[@]} ${cclkov[@]} "
@@ -52,7 +76,7 @@ fi
 
 #------------------------------------------------------------Mem Clock OffSet
 declare -a mclkov
-mclkovs=$(cat oc_settings.txt | grep 'mclkov')
+mclkovs=$(cat $SCRIPT_DIR/oc_settings.txt | grep 'mclkov')
 mclkovss=${mclkovs##"mclkov:"}
 read -a mclkov <<< ${mclkovss//","/" "}
 echo "carte mem clock offset ${#mclkov[@]} ${mclkov[@]} "
@@ -64,7 +88,7 @@ fi
 
 #------------------------------------------------------------Power Limit
 declare -a plv
-plvs=$(cat oc_settings.txt | grep 'plv')
+plvs=$(cat $SCRIPT_DIR/oc_settings.txt | grep 'plv')
 plvss=${plvs##"plv:"}
 read -a plv <<< ${plvss//","/" "}
 echo "${#plv[@]}"
@@ -105,6 +129,12 @@ done
 
 
 #Main
+#Reset ?
+if [[ $1 == "reset" ]]; then
+reset
+exit
+fi
+
 ##Fan Speed Control
 for ((i = 0 ; i < ${#fsv[@]} ; i++)); do
 fanSpeedControl $i ${fsv[$i]}
